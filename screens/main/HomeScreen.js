@@ -59,17 +59,17 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <View style={baseStyles.header}>
-        <Text style={baseStyles.headerTitle}>Ana Sayfa</Text>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Ana Sayfa</Text>
         <View style={styles.headerButtons}>
           <TouchableOpacity
             style={styles.iconButton}
             onPress={() => navigation.navigate("ProfileTab")}
           >
-            <Ionicons name="person" size={24} color={theme.colors.primary} />
+            <Ionicons name="person" size={24} color="#0f3c4c" />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconButton} onPress={handleLogout}>
-            <Ionicons name="log-out" size={24} color={theme.colors.primary} />
+            <Ionicons name="log-out" size={24} color="#0f3c4c" />
           </TouchableOpacity>
         </View>
       </View>
@@ -91,7 +91,7 @@ const HomeScreen = ({ navigation }) => {
         <Text style={styles.welcomeText}>Hoş geldiniz, {user?.email}</Text>
 
         {loading ? (
-          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <ActivityIndicator size="large" color="#0f3c4c" />
         ) : error ? (
           <View style={styles.messageContainer}>
             <Text style={styles.errorText}>{error}</Text>
@@ -122,7 +122,22 @@ const HomeScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    ...baseStyles.container,
+    flex: 1,
+    backgroundColor: "#f1ded0",
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: 60,
+    paddingBottom: 15,
+    paddingHorizontal: 20,
+    backgroundColor: "#fff",
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#26657F",
   },
   headerButtons: {
     flexDirection: "row",
@@ -166,10 +181,10 @@ const styles = StyleSheet.create({
     color: theme.colors.placeholder,
   },
   retryButton: {
-    backgroundColor: theme.colors.primary,
+    backgroundColor: "#0f3c4c",
     paddingVertical: 8,
     paddingHorizontal: 16,
-    borderRadius: theme.roundness.s,
+    borderRadius: 8,
   },
   retryButtonText: {
     color: "white",
@@ -179,8 +194,10 @@ const styles = StyleSheet.create({
     marginVertical: theme.spacing.s,
   },
   dataTitle: {
-    ...theme.typography.subheader,
+    fontSize: 18,
+    fontWeight: "bold",
     marginBottom: 5,
+    color: "#26657F",
   },
   dataDescription: {
     color: theme.colors.text,

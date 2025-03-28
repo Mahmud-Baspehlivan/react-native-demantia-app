@@ -6,50 +6,43 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
 } from "react-native";
-import { loginUser, registerUser } from "../../services/authService";
-import { theme, getStyles } from "../../theme";
-
-const baseStyles = getStyles();
+import { loginUser } from "../../services/authService";
+import { Ionicons } from "@expo/vector-icons";
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isLogin, setIsLogin] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleAuth = async () => {
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Hata", "E-posta ve şifre gerekli.");
+      Alert.alert("Hata", "Email ve şifre gereklidir.");
       return;
     }
 
     setLoading(true);
-
     try {
-      if (isLogin) {
-        await loginUser(email, password);
-      } else {
-        await registerUser(email, password);
-      }
+      await loginUser(email, password);
     } catch (error) {
-      let errorMessage = "İşlem sırasında bir hata oluştu.";
+      let errorMessage = "Giriş sırasında bir hata oluştu";
 
-      if (error.code === "auth/invalid-email") {
-        errorMessage = "Geçersiz e-posta adresi.";
-      } else if (error.code === "auth/user-disabled") {
-        errorMessage = "Bu kullanıcı devre dışı bırakılmış.";
-      } else if (error.code === "auth/user-not-found") {
-        errorMessage = "Bu e-posta adresine sahip bir kullanıcı bulunamadı.";
-      } else if (error.code === "auth/wrong-password") {
-        errorMessage = "Hatalı şifre.";
-      } else if (error.code === "auth/email-already-in-use") {
-        errorMessage = "Bu e-posta adresi zaten kullanılıyor.";
-      } else if (error.code === "auth/weak-password") {
-        errorMessage = "Şifre en az 6 karakter olmalıdır.";
+      if (
+        error.code === "auth/user-not-found" ||
+        error.code === "auth/wrong-password"
+      ) {
+        errorMessage = "Geçersiz email veya şifre";
+      } else if (error.code === "auth/invalid-email") {
+        errorMessage = "Geçersiz email formatı";
       }
 
-      Alert.alert("Hata", errorMessage);
+      Alert.alert("Giriş Hatası", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -57,52 +50,68 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.formContainer}>
-        <Text style={styles.title}>{isLogin ? "Giriş Yap" : "Kayıt Ol"}</Text>
+      <Text style={styles.title}>Hesabınıza giriş yapın</Text>
 
+      {/* Email Input */}
+      <View style={styles.inputWrapper}>
         <TextInput
           style={styles.input}
-          placeholder="E-posta"
+          placeholder="Email"
           keyboardType="email-address"
           autoCapitalize="none"
           value={email}
           onChangeText={setEmail}
         />
+      </View>
 
+      {/* Password Input */}
+      <View style={styles.inputWrapper}>
         <TextInput
           style={styles.input}
           placeholder="Şifre"
-          secureTextEntry
+          secureTextEntry={!showPassword}
           value={password}
           onChangeText={setPassword}
         />
-
         <TouchableOpacity
-          style={styles.button}
-          onPress={handleAuth}
-          disabled={loading}
+          style={styles.eyeIcon}
+          onPress={togglePasswordVisibility}
         >
-          <Text style={styles.buttonText}>
-            {loading ? "İşleniyor..." : isLogin ? "Giriş Yap" : "Kayıt Ol"}
-          </Text>
+          <Ionicons
+            name={showPassword ? "eye-off" : "eye"}
+            size={24}
+            color="#26657F"
+          />
         </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
-          <Text style={styles.switchText}>
-            {isLogin
-              ? "Hesabınız yok mu? Kayıt olun"
-              : "Zaten hesabınız var mı? Giriş yapın"}
-          </Text>
-        </TouchableOpacity>
-
-        {isLogin && (
-          <TouchableOpacity
-            onPress={() => navigation.navigate("ForgotPassword")}
-          >
-            <Text style={styles.forgotPasswordText}>Şifremi Unuttum</Text>
-          </TouchableOpacity>
-        )}
       </View>
+
+      {/* Forgot Password */}
+      <TouchableOpacity
+        onPress={() => navigation.navigate("ForgotPassword")}
+        style={styles.forgotPassword}
+      >
+        <Text style={styles.forgotPasswordText}>Şifremi Unuttum?</Text>
+      </TouchableOpacity>
+
+      {/* Sign In Button */}
+      <TouchableOpacity
+        style={styles.signInButton}
+        onPress={handleLogin}
+        disabled={loading}
+      >
+        {loading ? (
+          <ActivityIndicator color="#fff" size="small" />
+        ) : (
+          <Text style={styles.signInButtonText}>Giriş Yap</Text>
+        )}
+      </TouchableOpacity>
+
+      {/* Switch to Register */}
+      <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+        <Text style={styles.registerText}>
+          Hesabınız yok mu? <Text style={styles.registerLink}>Kayıt Olun</Text>
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -110,46 +119,64 @@ const LoginScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
-    alignItems: "center",
+    backgroundColor: "#f1ded0",
     justifyContent: "center",
-    padding: 20,
-  },
-  formContainer: {
-    width: "100%",
-    backgroundColor: theme.colors.card,
-    borderRadius: theme.roundness.m,
-    padding: theme.spacing.l,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    alignItems: "center",
+    paddingHorizontal: 20,
   },
   title: {
-    ...theme.typography.headerLarge,
-    marginBottom: theme.spacing.l,
-    textAlign: "center",
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#26657F",
+    marginBottom: 30,
+  },
+  inputWrapper: {
+    width: "100%",
+    marginBottom: 15,
+    position: "relative",
   },
   input: {
-    ...baseStyles.input,
+    width: "100%",
+    height: 50,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    backgroundColor: "#f9f9f9",
   },
-  button: {
-    ...baseStyles.button,
-    marginTop: theme.spacing.m,
+  eyeIcon: {
+    position: "absolute",
+    right: 15,
+    top: 13,
   },
-  buttonText: {
-    ...baseStyles.buttonText,
-  },
-  switchText: {
-    marginTop: theme.spacing.m,
-    textAlign: "center",
-    color: theme.colors.primary,
+  forgotPassword: {
+    alignSelf: "flex-end",
+    marginBottom: 20,
   },
   forgotPasswordText: {
-    marginTop: theme.spacing.m,
-    textAlign: "center",
-    color: theme.colors.primary,
+    color: "#26657F",
+    fontSize: 14,
+  },
+  signInButton: {
+    width: "100%",
+    height: 50,
+    backgroundColor: "#0f3c4c",
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  signInButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  registerText: {
+    fontSize: 14,
+    color: "#26657F",
+  },
+  registerLink: {
+    fontWeight: "bold",
     textDecorationLine: "underline",
   },
 });

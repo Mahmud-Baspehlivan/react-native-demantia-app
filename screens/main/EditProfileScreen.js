@@ -66,7 +66,7 @@ const EditProfileScreen = ({ navigation, route }) => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color={theme.colors.primary} />
+          <Ionicons name="arrow-back" size={24} color="#0f3c4c" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Profil Düzenle</Text>
         <View style={{ width: 24 }} />
@@ -132,13 +132,13 @@ const EditProfileScreen = ({ navigation, route }) => {
 
         <TouchableOpacity
           style={[
-            baseStyles.button,
+            styles.button,
             (loading || !backendAvailable) && styles.disabledButton,
           ]}
           onPress={handleSave}
           disabled={loading || !backendAvailable}
         >
-          <Text style={baseStyles.buttonText}>
+          <Text style={styles.buttonText}>
             {loading ? "Kaydediliyor..." : "Değişiklikleri Kaydet"}
           </Text>
         </TouchableOpacity>
@@ -149,13 +149,22 @@ const EditProfileScreen = ({ navigation, route }) => {
 
 const styles = StyleSheet.create({
   container: {
-    ...baseStyles.container,
+    flex: 1,
+    backgroundColor: "#f1ded0",
   },
   header: {
-    ...baseStyles.header,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: 60,
+    paddingBottom: 15,
+    paddingHorizontal: 20,
+    backgroundColor: "#fff",
   },
   headerTitle: {
-    ...baseStyles.headerTitle,
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#26657F",
   },
   offlineWarning: {
     flexDirection: "row",
@@ -181,8 +190,8 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: "500",
-    marginBottom: theme.spacing.xs,
-    color: theme.colors.text,
+    marginBottom: 8,
+    color: "#26657F",
   },
   textArea: {
     height: 100,
@@ -198,8 +207,21 @@ const styles = StyleSheet.create({
     marginTop: -theme.spacing.s,
     marginLeft: theme.spacing.xs,
   },
+  button: {
+    backgroundColor: "#0f3c4c",
+    borderRadius: 8,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    alignItems: "center",
+    marginVertical: 20,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
   disabledButton: {
-    backgroundColor: theme.colors.placeholder,
+    backgroundColor: "#9E9E9E",
   },
 });
 

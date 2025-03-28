@@ -227,6 +227,79 @@ const getMockData = (endpoint) => {
     ];
   }
 
+  // Mock classification questions
+  if (endpoint === "/api/questions/question_tag/classification") {
+    return [
+      {
+        id: "class_q1",
+        question_text: "Kaç yaşındasınız?",
+        question_type: "multiple_choice",
+        options: ["50-59", "60-69", "70-79", "80+"],
+        question_number: "1",
+        category: "demographic",
+      },
+      {
+        id: "class_q2",
+        question_text: "Cinsiyetinizi belirtiniz.",
+        question_type: "multiple_choice",
+        options: ["Kadın", "Erkek"],
+        question_number: "2",
+        category: "demographic",
+      },
+      {
+        id: "class_q3",
+        question_text: "Eğitim seviyeniz nedir?",
+        question_type: "multiple_choice",
+        options: ["İlkokul veya daha az", "Lise", "Üniversite ve üstü"],
+        question_number: "3",
+        category: "education",
+      },
+      {
+        id: "class_q4",
+        question_text: "Son 6 ay içinde unutkanlık yaşadınız mı?",
+        question_type: "multiple_choice",
+        options: ["Evet", "Hayır"],
+        question_number: "4",
+        category: "cognitive_status",
+      },
+      {
+        id: "class_q5",
+        question_text:
+          "Son 6 ayda günlük işlerinizi yapmakta zorlanıyor musunuz?",
+        question_type: "multiple_choice",
+        options: ["Evet", "Bazen", "Hayır"],
+        question_number: "5",
+        category: "cognitive_status",
+      },
+      {
+        id: "class_q6",
+        question_text: "Ailenizde demans/Alzheimer hastalığı öyküsü var mı?",
+        question_type: "multiple_choice",
+        options: ["Evet", "Hayır", "Bilmiyorum"],
+        question_number: "6",
+        category: "medical",
+      },
+      {
+        id: "class_q7",
+        question_text:
+          "Günlük yaşamınızda ne sıklıkla sosyal aktiviteler yaparsınız?",
+        question_type: "multiple_choice",
+        options: ["Hiç", "Nadiren", "Bazen", "Sıklıkla"],
+        question_number: "7",
+        category: "social_activity",
+      },
+    ];
+  }
+
+  // Mock specific question by number
+  if (endpoint.startsWith("/api/questions/question_number/")) {
+    const number = endpoint.split("/").pop();
+    const mockQuestions = getMockData(
+      "/api/questions/question_tag/classification"
+    );
+    return mockQuestions.find((q) => q.question_number === number) || null;
+  }
+
   // Mock data details
   if (endpoint.startsWith("/api/data/")) {
     const id = endpoint.split("/").pop();
@@ -235,6 +308,36 @@ const getMockData = (endpoint) => {
       title: `Test Detay Başlık ${id}`,
       description: `Test Detay Açıklama ${id}`,
       createdAt: new Date().toISOString(),
+    };
+  }
+
+  // Mock classification test start
+  if (endpoint === "/api/classification/start") {
+    return {
+      sessionId: "mock_session_" + Date.now(),
+      message: "Classification test started successfully",
+    };
+  }
+
+  // Mock classification test response submission
+  if (endpoint === "/api/classification/submit-response") {
+    return {
+      responseId: "mock_response_" + Date.now(),
+      message: "Response recorded successfully",
+    };
+  }
+
+  // Mock classification test completion
+  if (endpoint === "/api/classification/complete") {
+    return {
+      sessionId: "mock_session_123",
+      classification: {
+        age_group: "60-69",
+        cognitive_status: "MCI",
+        education_level: "Lise",
+        risk_level: "Orta",
+      },
+      message: "Classification test completed successfully",
     };
   }
 
@@ -267,5 +370,55 @@ export const dataAPI = {
   getDataById: async (id) => {
     const endpoint = config.endpoints.data.details.replace("{id}", id);
     return await apiRequest(endpoint);
+  },
+};
+
+// Classification test related API endpoints
+export const classificationAPI = {
+  // Fetch classification questions
+  getClassificationQuestions: async () => {
+    return await apiRequest("/api/questions/question_tag/classification");
+  },
+
+  // Fetch questions in order
+  getOrderedClassificationQuestions: async () => {
+    return await apiRequest("/api/questions/ordered/classification");
+  },
+
+  // Get specific question by number
+  getQuestionByNumber: async (number) => {
+    return await apiRequest(`/api/questions/question_number/${number}`);
+  },
+
+  // Start a classification test
+  startClassificationTest: async (patientId) => {
+    return await apiRequest("/api/classification/start", {
+      method: "POST",
+      body: JSON.stringify({ patientId }),
+    });
+  },
+
+  // Submit a response to a classification question
+  submitResponse: async (sessionId, patientId, questionId, answer) => {
+    return await apiRequest("/api/classification/submit-response", {
+      method: "POST",
+      body: JSON.stringify({
+        sessionId,
+        patientId,
+        questionId,
+        answer,
+      }),
+    });
+  },
+
+  // Complete classification test
+  completeClassificationTest: async (sessionId, patientId) => {
+    return await apiRequest("/api/classification/complete", {
+      method: "POST",
+      body: JSON.stringify({
+        sessionId,
+        patientId,
+      }),
+    });
   },
 };

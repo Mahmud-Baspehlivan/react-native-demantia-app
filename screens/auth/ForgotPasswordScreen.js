@@ -9,10 +9,7 @@ import {
 } from "react-native";
 import { sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../../config/firebase";
-import { theme, getStyles } from "../../theme";
 import { Ionicons } from "@expo/vector-icons";
-
-const baseStyles = getStyles();
 
 const ForgotPasswordScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
@@ -52,7 +49,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color={theme.colors.primary} />
+          <Ionicons name="arrow-back" size={24} color="#0f3c4c" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Şifremi Unuttum</Text>
         <View style={{ width: 24 }} />
@@ -65,7 +62,7 @@ const ForgotPasswordScreen = ({ navigation }) => {
         </Text>
 
         <TextInput
-          style={baseStyles.input}
+          style={styles.input}
           placeholder="E-posta"
           keyboardType="email-address"
           autoCapitalize="none"
@@ -74,11 +71,11 @@ const ForgotPasswordScreen = ({ navigation }) => {
         />
 
         <TouchableOpacity
-          style={baseStyles.button}
+          style={styles.button}
           onPress={handleResetPassword}
           disabled={loading}
         >
-          <Text style={baseStyles.buttonText}>
+          <Text style={styles.buttonText}>
             {loading ? "İşleniyor..." : "Şifre Sıfırlama Bağlantısı Gönder"}
           </Text>
         </TouchableOpacity>
@@ -89,22 +86,53 @@ const ForgotPasswordScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    ...baseStyles.container,
+    flex: 1,
+    backgroundColor: "#f1ded0",
   },
   header: {
-    ...baseStyles.header,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: 60,
+    paddingBottom: 15,
+    paddingHorizontal: 20,
+    backgroundColor: "#fff",
   },
   headerTitle: {
-    ...baseStyles.headerTitle,
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#26657F",
   },
   content: {
     flex: 1,
-    padding: theme.spacing.l,
+    padding: 20,
   },
   description: {
     fontSize: 16,
-    marginBottom: theme.spacing.l,
-    color: theme.colors.text,
+    marginBottom: 20,
+    color: "#26657F",
+  },
+  input: {
+    width: "100%",
+    height: 50,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    paddingHorizontal: 15,
+    backgroundColor: "#f9f9f9",
+    marginBottom: 15,
+  },
+  button: {
+    backgroundColor: "#0f3c4c",
+    borderRadius: 8,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 
