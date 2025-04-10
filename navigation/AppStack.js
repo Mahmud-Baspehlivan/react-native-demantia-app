@@ -4,12 +4,14 @@ import { createStackNavigator } from "@react-navigation/stack";
 import { Ionicons } from "@expo/vector-icons";
 
 import HomeScreen from "../screens/main/HomeScreen";
-import ProfileStack from "./ProfileStack";
+import ProfileScreen from "../screens/main/ProfileScreen"; // Buraya gerçek dosya yolunu yazın
+import TestStack from "./TestStack";
 import { theme } from "../theme";
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
+// TabBar içinde ana navigasyon
 const AppTabs = () => {
   return (
     <Tab.Navigator
@@ -17,9 +19,9 @@ const AppTabs = () => {
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
 
-          if (route.name === "HomeTab") {
+          if (route.name === "Home") {
             iconName = focused ? "home" : "home-outline";
-          } else if (route.name === "ProfileTab") {
+          } else if (route.name === "Profile") {
             iconName = focused ? "person" : "person-outline";
           }
 
@@ -31,23 +33,25 @@ const AppTabs = () => {
       })}
     >
       <Tab.Screen
-        name="HomeTab"
+        name="Home"
         component={HomeScreen}
         options={{ tabBarLabel: "Ana Sayfa" }}
       />
       <Tab.Screen
-        name="ProfileTab"
-        component={ProfileStack}
+        name="Profile"
+        component={ProfileScreen}
         options={{ tabBarLabel: "Profil" }}
       />
     </Tab.Navigator>
   );
 };
 
+// Ana stack navigasyon
 export default function AppStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Main" component={AppTabs} />
+      <Stack.Screen name="TestFlow" component={TestStack} />
     </Stack.Navigator>
   );
 }

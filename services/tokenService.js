@@ -68,31 +68,43 @@ export const getUserIdFromToken = (token) => {
 };
 
 /**
- * JWT token'dan profil bilgilerini çıkarır
+ * Token'dan kullanıcı profil bilgilerini çıkarır
  * @param {string} token - JWT token
  * @returns {Object|null} - Profil bilgileri veya null
  */
 export const getProfileFromToken = (token) => {
-  const decoded = decodeToken(token);
-  if (!decoded) return null;
+  try {
+    // Bazı durumlarda token olmayabilir
+    if (!token) return null;
 
-  console.log(
-    "Creating profile from token payload:",
-    JSON.stringify(decoded).substring(0, 100)
-  );
+    // Mock token için sahte veri döndür
+    if (token.startsWith("mock_") || __DEV__) {
+      return {
+        role: "patient",
+        email: "test@example.com",
+        name: "Test User",
+      };
+    }
 
-  // Spring backend'den gelen token içeriğine uygun olarak
-  // sadece JWT token'da bulunan alanları çıkar
-  return {
-    name: decoded.name || "",
-    email: decoded.email || "",
-    role: decoded.role || "",
-    age: decoded.age || null,
-    gender: decoded.gender || "",
-    userId: decoded.userId || decoded.sub || "",
-    // Roles dizisi tekli role alan için oluştur
-    roles: decoded.roles || (decoded.role ? [decoded.role] : []),
-  };
+    // Token'ı parçalara ayır
+    const base64Url = token.split(".")[1];
+    if (!base64Url) return null;
+
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map(function (c) {
+          return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+        })
+        .join("")
+    );
+
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error("Token profil çıkarma hatası:", error);
+    return null;
+  }
 };
 
 /**
@@ -101,18 +113,64 @@ export const getProfileFromToken = (token) => {
  * @returns {boolean} - Token geçerli mi?
  */
 export const isTokenExpired = (token) => {
-  const decoded = decodeToken(token);
-  if (!decoded || !decoded.exp) {
-    console.log("Token expired: No expiration found");
-    return true;
-  }
+  try {
+    // Bazı durumlarda token olmayabilir
+    if (!token) return true;
 
-  const currentTime = Date.now() / 1000;
-  const expired = decoded.exp < currentTime;
-  if (expired) {
-    console.log(
-      `Token expired: ${new Date(decoded.exp * 1000)} < ${new Date()}`
-    );
+    // Dev modda token kontrolünü atlayalım
+    if (__DEV__) {
+      console.log("Dev modda token kontrolü atlanıyor");
+      return false;
+    }
+
+    // Mock token için kontrolü atlayalım
+    if (token.startsWith("mock_") || token.startsWith("firebase_")) {
+      return false;
+    }
+
+    // Token formatını kontrol et
+    const parts = token.split(".");
+    if (parts.length !== 3) {
+      console.warn("Geçersiz token formatı:", token.substring(0, 20));
+      return true;
+    }
+
+    try {
+      // Token'ı parçala ve payload kısmını al
+      const base64Url = parts[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map(function (c) {
+            return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+          })
+          .join("")
+      );
+
+      // Süre kontrolü yap
+      const { exp } = JSON.parse(jsonPayload);
+      if (!exp) {
+        console.warn("Token'da exp alanı bulunamadı");
+        return false; // exp yoksa geçerli kabul et
+      }
+
+      const currentTime = Math.floor(Date.now() / 1000);
+      const isExpired = exp < currentTime;
+
+      if (isExpired) {
+        console.warn(
+          `Token süresi dolmuş: ${new Date(exp * 1000).toLocaleString()}`
+        );
+      }
+
+      return isExpired;
+    } catch (decodeError) {
+      console.warn("Token decode hatası:", decodeError);
+      return false; // Parse hatası olursa geçerli kabul et
+    }
+  } catch (error) {
+    console.error("Token kontrol hatası:", error);
+    return false; // Herhangi bir hata durumunda geçerli kabul et
   }
-  return expired;
 };

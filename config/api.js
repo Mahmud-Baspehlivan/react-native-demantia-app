@@ -1,11 +1,12 @@
 export const config = {
   // API base URL - Spring backend URL'iniz
   apiUrl: "http://10.0.2.2:8080", // Android emülatörü için localhost
-  // veya "http://localhost:8080" // Cihaz test için
-  // veya "http://192.168.1.x:8080" // Yerel ağda test için (IP'nizi kullanın)
 
-  // Dev mode flag for using mock data
-  devMode: true,
+  // Dev mode flag for using mock data when backend is not available
+  devMode: true, // Development modunda her zaman true kalsın
+
+  // Dev modda sınıflandırma testini zorunlu olarak göster
+  forceClassification: true,
 
   // API timeouts
   timeout: 10000, // 10 seconds
