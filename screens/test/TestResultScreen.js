@@ -82,22 +82,40 @@ const TestResultScreen = ({ navigation }) => {
       console.log("Test result:", testResult);
 
       // Complete classification and update user profile
-      if (sessionId && testResult) {
+      if (sessionId && user?.uid && testResult) {
         try {
-          const patientId = user?.uid || "anonymous";
-          await completeClassification(sessionId, testResult);
-          console.log("Classification tamamlandı");
+          const patientId = user.uid;
+          const result = await completeClassification(sessionId, patientId);
+          console.log("Classification tamamlandı, yanıt:", result);
+
+          // Sonucu kontrol et
+          if (result && result.profileCompleted === true) {
+            console.log("Profil başarıyla güncellendi!");
+          } else {
+            console.warn(
+              "Profil güncelleme durumu belirsiz:",
+              result?.profileCompleted
+            );
+          }
         } catch (error) {
           console.error("Classification tamamlama hatası:", error);
-          // Hata olsa bile devam et
+          Alert.alert(
+            "Uyarı",
+            "Profil güncellenirken bir sorun oluştu. Daha sonra tekrar deneyebilirsiniz.",
+            [{ text: "Tamam" }]
+          );
         }
+      } else {
+        console.warn(
+          "Gerekli bilgiler eksik: sessionId, userId veya testResult"
+        );
       }
 
       // Reset the test state
       resetTest();
 
+      // Navigate away
       try {
-        // Navigation problemi yaratmayacak şekilde basit bir yaklaşımla yönlendir
         navigation.dispatch(
           CommonActions.reset({
             index: 0,
@@ -106,13 +124,7 @@ const TestResultScreen = ({ navigation }) => {
         );
       } catch (navError) {
         console.error("Navigation reset hatası:", navError);
-
-        // Alternatif olarak goBack denemesi yap
-        try {
-          navigation.popToTop();
-        } catch (popError) {
-          console.error("Navigation popToTop hatası:", popError);
-        }
+        navigation.popToTop();
       }
     } catch (error) {
       console.error("Testi tamamlama hatası:", error);
